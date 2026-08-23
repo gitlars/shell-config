@@ -154,7 +154,7 @@ to the copy sitting beside it, so the repo can be cloned anywhere. An existing
 | ` main` | current branch |
 | `!2 ?1 +3 ⇡1` | modified / untracked / staged / ahead — dirty state at a glance |
 | `(rebasing 2/5)` | mid-rebase or mid-merge, in red |
-| `🍔` / `💥` | burger when the last command succeeded, explosion when it failed |
+| `` | green when the last command succeeded, **red when it failed** |
 | right side | command duration over 2s, exit code on failure, background job count |
 
 Colours match the WezTerm Tokyo Night scheme, so prompt and terminal chrome read
