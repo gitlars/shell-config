@@ -1,0 +1,13 @@
+# ripgrep defaults -- pointed at by RIPGREP_CONFIG_PATH in common.sh.
+# Command-line flags always win over anything in here.
+
+# Case-insensitive unless the pattern contains an uppercase letter.
+--smart-case
+
+# Search dotfiles too, but never inside .git.
+--hidden
+--glob=!.git/*
+
+# Keep minified files and lockfiles from flooding the terminal.
+--max-columns=200
+--max-columns-preview

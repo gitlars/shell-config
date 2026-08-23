@@ -32,6 +32,7 @@ file for that shell, never in `common.sh`.
 |---|---|
 | `common.sh` | Portable config sourced by both shells. No `setopt`, `bindkey`, or `shopt`. |
 | `starship.toml` | Prompt configuration. Works unchanged in zsh, bash, fish and PowerShell. |
+| `ripgreprc` | ripgrep defaults (smart-case, search dotfiles, skip `.git`). |
 | `bootstrap.sh` | Wires a shell's rc file to `common.sh`. Idempotent and non-destructive. |
 
 ## Install
@@ -80,6 +81,10 @@ Install the tools first — `common.sh` silently skips anything that is not on
 | [starship](https://starship.rs) | `brew install starship` | `curl -sS https://starship.rs/install.sh \| sh` |
 | [fzf](https://github.com/junegunn/fzf) | `brew install fzf` | `apt install fzf` |
 | [zoxide](https://github.com/ajeetdsouza/zoxide) | `brew install zoxide` | `apt install zoxide` |
+| [eza](https://github.com/eza-community/eza) | `brew install eza` | `apt install eza` (24.04+) |
+| [bat](https://github.com/sharkdp/bat) | `brew install bat` | `apt install bat` |
+| [fd](https://github.com/sharkdp/fd) | `brew install fd` | `apt install fd-find` |
+| [ripgrep](https://github.com/BurntSushi/ripgrep) | `brew install ripgrep` | `apt install ripgrep` |
 
 Ubuntu's `apt` starship package is usually well behind; the install script above
 is the maintained route.
@@ -99,6 +104,38 @@ a week of normal use to become useful. `fzf` pays off immediately.
 
 Ubuntu 22.04 ships fzf 0.29, which predates `fzf --bash`; `common.sh` falls back
 to the key-binding scripts that older package installs on disk.
+
+## File tools
+
+| Command | Does |
+|---|---|
+| `ls` | `eza`, directories first |
+| `ll` / `la` | long listing, with git status per file / including dotfiles |
+| `lt` | tree, two levels deep |
+| `bat FILE` | `cat` with syntax highlighting and paging |
+| `fd PATTERN` | find files; respects `.gitignore`, far faster than `find` |
+| `rg PATTERN` | recursive search; smart-case, searches dotfiles, skips `.git` |
+
+**`cat` is deliberately not aliased to `bat`.** `cat` is a POSIX tool people
+reason about as behaving exactly one way, and silently changing it invites
+surprises in pipelines and pasted commands. Type `bat` when you want
+highlighting.
+
+`fd` also backs fzf's `CTRL+T` and `ALT+C`, so both respect `.gitignore` and skip
+`.git` — faster and quieter than the default `find` walk.
+
+### A portability trap worth knowing
+
+Debian and Ubuntu ship two of these under different names, because the obvious
+ones were already taken by unrelated packages:
+
+| Upstream | On Debian/Ubuntu |
+|---|---|
+| `bat` | `batcat` |
+| `fd` | `fdfind` |
+
+`common.sh` detects this and aliases them back, so the same commands work on
+both platforms without you having to remember which machine you are on.
 
 ## The prompt
 

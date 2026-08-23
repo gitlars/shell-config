@@ -62,4 +62,64 @@ if [ -n "$_shell_name" ] && command -v fzf >/dev/null 2>&1; then
   fi
 fi
 
-unset _shell_name _shell_src _shell_dir
+# --- Debian/Ubuntu binary names ---------------------------------------------
+# Debian ships bat as `batcat` and fd as `fdfind`, because both names were
+# already taken by other packages. Normalise to one name so muscle memory and
+# the rest of this file work identically on every distro.
+if command -v fd >/dev/null 2>&1; then
+  _fd=fd
+elif command -v fdfind >/dev/null 2>&1; then
+  _fd=fdfind
+  alias fd=fdfind
+else
+  _fd=
+fi
+
+if command -v bat >/dev/null 2>&1; then
+  _bat=bat
+elif command -v batcat >/dev/null 2>&1; then
+  _bat=batcat
+  alias bat=batcat
+else
+  _bat=
+fi
+
+# --- eza --------------------------------------------------------------------
+# Aliases only affect interactive use; scripts calling `ls` are unaffected.
+if command -v eza >/dev/null 2>&1; then
+  alias ls='eza --group-directories-first'
+  alias ll='eza -l  --git --group-directories-first'
+  alias la='eza -la --git --group-directories-first'
+  alias lt='eza --tree --level=2 --group-directories-first'
+fi
+
+# --- bat --------------------------------------------------------------------
+# `cat` is deliberately NOT aliased. It is a POSIX tool that people reason about
+# as behaving exactly one way, and quietly changing it invites surprises in
+# pipelines and pasted commands. Reach for `bat` when you want highlighting.
+if [ -n "$_bat" ]; then
+  # `ansi` follows the terminal's own palette, so bat matches whatever colour
+  # scheme is active instead of fighting it. `bat --list-themes` to change.
+  export BAT_THEME="${BAT_THEME:-ansi}"
+fi
+
+# --- ripgrep ----------------------------------------------------------------
+if command -v rg >/dev/null 2>&1 && [ -r "$_shell_dir/ripgreprc" ]; then
+  export RIPGREP_CONFIG_PATH="${RIPGREP_CONFIG_PATH:-$_shell_dir/ripgreprc}"
+fi
+
+# --- fzf, backed by fd ------------------------------------------------------
+# Makes CTRL+T and ALT+C respect .gitignore and skip .git, and much faster than
+# the default find-based walk.
+if [ -n "$_fd" ]; then
+  export FZF_DEFAULT_COMMAND="$_fd --type f --hidden --follow --exclude .git"
+  export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+  export FZF_ALT_C_COMMAND="$_fd --type d --hidden --follow --exclude .git"
+fi
+
+# Tokyo Night colours, matching the WezTerm scheme and the starship prompt.
+export FZF_DEFAULT_OPTS="${FZF_DEFAULT_OPTS:---height 40% --layout=reverse --border --info=inline \
+--color=fg:#c0caf5,hl:#7aa2f7,fg+:#c0caf5,bg+:#292e42,hl+:#7dcfff \
+--color=info:#565f89,prompt:#9ece6a,pointer:#bb9af7,marker:#e0af68,spinner:#bb9af7,header:#565f89}"
+
+unset _shell_name _shell_src _shell_dir _fd _bat
