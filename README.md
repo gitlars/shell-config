@@ -1,0 +1,155 @@
+# shell-config
+
+Shared shell configuration for zsh and bash. One set of tools and settings that
+behaves the same on macOS (zsh) and Ubuntu (bash), without forcing either
+platform off its default shell.
+
+## Why not just pick one shell?
+
+macOS defaults to zsh; Ubuntu defaults to bash. Converging on one means fighting
+a vendor default on every machine — and on a server you do not control, bash is
+what exists. So the substance is shared and only the thin per-shell glue differs.
+
+Roughly 80% of a modern shell config ports cleanly:
+
+| Shares cleanly | Needs a per-shell line |
+|---|---|
+| `PATH` and other exports | history options (`setopt` vs `HISTCONTROL`) |
+| aliases | completion system (`compinit` vs `bash_completion`) |
+| tool init (`fzf`, `zoxide`, `starship`) | key bindings (`bindkey` vs `bind`) |
+| functions, if written POSIX-ish | |
+
+`common.sh` holds the portable part. Anything shell-specific belongs in the rc
+file for that shell, never in `common.sh`.
+
+> **Scope note:** this covers zsh and bash only. Windows means PowerShell, where
+> the rc file does not port — though every tool below has a native Windows build,
+> and `starship.toml` works in PowerShell unchanged.
+
+## Files
+
+| Path | Purpose |
+|---|---|
+| `common.sh` | Portable config sourced by both shells. No `setopt`, `bindkey`, or `shopt`. |
+| `starship.toml` | Prompt configuration. Works unchanged in zsh, bash, fish and PowerShell. |
+| `bootstrap.sh` | Wires a shell's rc file to `common.sh`. Idempotent and non-destructive. |
+
+## Install
+
+```sh
+git clone https://github.com/$GH_OWNER/shell-config ~/.config/shell
+~/.config/shell/bootstrap.sh              # detects your shell from $SHELL
+```
+
+Or target one explicitly:
+
+```sh
+~/.config/shell/bootstrap.sh --shell zsh
+~/.config/shell/bootstrap.sh --shell bash
+```
+
+Preview without writing anything:
+
+```sh
+~/.config/shell/bootstrap.sh --dry-run
+```
+
+### What bootstrap.sh guarantees
+
+- **Idempotent.** Re-running never duplicates anything. It writes one
+  marker-delimited block and rewrites that block in place on later runs.
+- **Non-destructive.** Only the managed block is ever written. Every other line
+  in your rc file is left byte-for-byte alone, and the file is backed up to
+  `<rc>.bak-<timestamp>` before any change.
+- **Conflict-aware.** If your rc already initialises fzf or zoxide, sources
+  `common.sh`, or defines its own `z`, it reports the offending line numbers and
+  **exits without modifying anything**. Pass `--force` to override deliberately.
+
+Your own settings must live *outside* the markers. Anything inside is rewritten.
+
+On bash it also ensures `~/.bash_profile` sources `~/.bashrc`, which macOS login
+shells require and Linux usually already has.
+
+## What you get
+
+Install the tools first — `common.sh` silently skips anything that is not on
+`PATH`, so a partial install degrades rather than erroring.
+
+| Tool | macOS | Ubuntu |
+|---|---|---|
+| [starship](https://starship.rs) | `brew install starship` | `curl -sS https://starship.rs/install.sh \| sh` |
+| [fzf](https://github.com/junegunn/fzf) | `brew install fzf` | `apt install fzf` |
+| [zoxide](https://github.com/ajeetdsouza/zoxide) | `brew install zoxide` | `apt install zoxide` |
+
+Ubuntu's `apt` starship package is usually well behind; the install script above
+is the maintained route.
+
+### Keys and commands
+
+| Keys | Action |
+|---|---|
+| `CTRL+R` | fuzzy search shell history — the one you will use constantly |
+| `CTRL+T` | insert a file path at the cursor |
+| `ALT+C` | `cd` into a subdirectory |
+| `z <fragment>` | jump to a directory you have visited, ranked by frequency and recency |
+| `zi` | pick that directory interactively |
+
+`zoxide` only knows directories visited since it was installed, so it takes about
+a week of normal use to become useful. `fzf` pays off immediately.
+
+Ubuntu 22.04 ships fzf 0.29, which predates `fzf --bash`; `common.sh` falls back
+to the key-binding scripts that older package installs on disk.
+
+## The prompt
+
+`starship.toml` is picked up automatically — `common.sh` sets `STARSHIP_CONFIG`
+to the copy sitting beside it, so the repo can be cloned anywhere. An existing
+`STARSHIP_CONFIG` in your environment is respected and never overwritten.
+
+```
+~/.config/wezterm on  main !2 ?1
+❯
+```
+
+| Element | Meaning |
+|---|---|
+| directory | truncated to 3 segments, or to the repo root inside a git repo |
+| ` main` | current branch |
+| `!2 ?1 +3 ⇡1` | modified / untracked / staged / ahead — dirty state at a glance |
+| `(rebasing 2/5)` | mid-rebase or mid-merge, in red |
+| `❯` | green when the last command succeeded, **red when it failed** |
+| right side | command duration over 2s, exit code on failure, background job count |
+
+Colours match the WezTerm Tokyo Night scheme, so prompt and terminal chrome read
+as one thing. Symbols need a Nerd Font — the same
+[JetBrainsMono Nerd Font](https://github.com/ryanoasis/nerd-fonts) the WezTerm
+config uses.
+
+Language-version modules (node, python, rust, go) are **disabled by default**:
+each one costs milliseconds on every prompt. Enable what you actually want by
+flipping `disabled = false` in `starship.toml`.
+
+### Overlap with the WezTerm status bar
+
+Both show the git branch, deliberately. The status bar is ambient and always
+current; the prompt is captured in scrollback, so weeks later you can still see
+which branch a given command ran on. The prompt also carries dirty and
+ahead/behind state, which the status bar does not. Drop the branch segment from
+either if the duplication bothers you.
+
+## Adding to it
+
+Portable settings — exports, aliases, POSIX functions — go in `common.sh` and
+apply to both shells everywhere. Shell-specific settings go in the rc file,
+outside the managed block:
+
+```sh
+# ~/.zshrc, outside the markers
+setopt HIST_IGNORE_SPACE      # bash equivalent: HISTCONTROL=ignorespace
+```
+
+## Uninstall
+
+Delete the block between the `# >>> shell-config (managed) >>>` and
+`# <<< shell-config (managed) <<<` markers in your rc file, or restore the
+timestamped backup that `bootstrap.sh` wrote.

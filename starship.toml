@@ -1,0 +1,105 @@
+# starship prompt -- https://starship.rs
+#
+# Colours match the WezTerm Tokyo Night scheme so the prompt and the terminal
+# chrome read as one thing. Works identically in zsh, bash, fish and PowerShell.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+$directory$git_branch$git_status$git_state
+$character"""
+
+right_format = """$cmd_duration$status$jobs"""
+
+add_newline = true
+command_timeout = 1000
+
+palette = 'tokyonight'
+
+[palettes.tokyonight]
+blue    = '#7aa2f7'
+cyan    = '#7dcfff'
+green   = '#9ece6a'
+magenta = '#bb9af7'
+orange  = '#ff9e64'
+red     = '#f7768e'
+yellow  = '#e0af68'
+comment = '#565f89'
+fg      = '#c0caf5'
+
+# --- where you are -----------------------------------------------------------
+[directory]
+style = 'bold blue'
+truncation_length = 3
+truncate_to_repo = true
+truncation_symbol = '…/'
+read_only = ' '
+read_only_style = 'red'
+
+# --- git ---------------------------------------------------------------------
+# The WezTerm status bar also shows the branch. This is not redundant: the
+# status bar is ambient and always current, while the prompt is captured in
+# scrollback, so you can see which branch a command ran on days later. This one
+# also carries dirty/ahead/behind state, which the status bar does not.
+[git_branch]
+symbol = ' '
+style = 'bold magenta'
+format = 'on [$symbol$branch]($style) '
+
+[git_status]
+style = 'bold yellow'
+format = '([$all_status$ahead_behind]($style) )'
+conflicted = '='
+ahead = '⇡${count}'
+behind = '⇣${count}'
+diverged = '⇕⇡${ahead_count}⇣${behind_count}'
+untracked = '?${count}'
+stashed = '*${count}'
+modified = '!${count}'
+staged = '+${count}'
+renamed = '»${count}'
+deleted = '✘${count}'
+
+# Mid-rebase / mid-merge is exactly when you need to be told.
+[git_state]
+style = 'bold red'
+format = '\([$state( $progress_current/$progress_total)]($style)\) '
+
+# --- the prompt character ----------------------------------------------------
+# Green when the last command succeeded, red when it failed. The fastest
+# possible signal, before you even read the exit code.
+[character]
+success_symbol = '[❯](bold green)'
+error_symbol = '[❯](bold red)'
+vimcmd_symbol = '[❮](bold yellow)'
+
+# --- right side --------------------------------------------------------------
+[cmd_duration]
+min_time = 2000
+style = 'comment'
+format = '[ $duration]($style) '
+
+[status]
+disabled = false
+style = 'bold red'
+format = '[$symbol$status]($style) '
+symbol = '✘ '
+map_symbol = true
+
+[jobs]
+style = 'bold cyan'
+format = '[$symbol$number]($style) '
+symbol = ' '
+number_threshold = 1
+
+# --- language versions, only where relevant ----------------------------------
+# Deliberately sparse: every enabled module costs milliseconds on every prompt.
+# Add more with `starship explain` if you want them.
+[nodejs]
+disabled = true
+[python]
+disabled = true
+[rust]
+disabled = true
+[golang]
+disabled = true

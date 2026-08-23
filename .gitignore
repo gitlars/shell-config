@@ -1,0 +1,6 @@
+# rc-file backups written by bootstrap.sh
+*.bak-*
+
+# OS noise
+.DS_Store
+Thumbs.db
