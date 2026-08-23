@@ -69,9 +69,13 @@ format = '\([$state( $progress_current/$progress_total)]($style)\) '
 # Green when the last command succeeded, red when it failed. The fastest
 # possible signal, before you even read the exit code.
 [character]
-success_symbol = '[❯](bold green)'
-error_symbol = '[❯](bold red)'
-vimcmd_symbol = '[❮](bold yellow)'
+# Emoji ignore the style colour -- they render in their own palette -- so the
+# success/failure signal has to come from the glyph itself rather than red vs
+# green. Want 🍔 unconditionally? Set error_symbol to '🍔' too; the exit code
+# still shows on the right via the [status] module.
+success_symbol = '🍔'
+error_symbol = '💥'
+vimcmd_symbol = '🥢'
 
 # --- right side --------------------------------------------------------------
 [cmd_duration]
