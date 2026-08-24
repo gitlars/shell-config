@@ -114,8 +114,14 @@ if [ -n "$_bat" ]; then
 
   # Syntax-highlighted man pages. MANROFFOPT=-c is needed for groff 1.23+,
   # which otherwise emits escapes that survive `col` and litter the output.
-  export MANPAGER="sh -c 'col -bx | $_bat --language=man --style=plain'"
-  export MANROFFOPT='-c'
+  #
+  # Guarded on col: it is base-system on macOS but a separate package on Debian
+  # (bsdextrautils). Exporting MANPAGER without it would pipe man into a missing
+  # command and produce nothing -- a hard break, not a graceful degradation.
+  if command -v col >/dev/null 2>&1; then
+    export MANPAGER="sh -c 'col -bx | $_bat --language=man --style=plain'"
+    export MANROFFOPT='-c'
+  fi
 
   # `bathelp fd` pages a long --help through bat. Deliberately not named
   # `help`: that is a bash builtin, and shadowing it would break `help while`.

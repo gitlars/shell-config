@@ -76,23 +76,36 @@ Your own settings must live *outside* the markers. Anything inside is rewritten.
 On bash it also ensures `~/.bash_profile` sources `~/.bashrc`, which macOS login
 shells require and Linux usually already has.
 
+## Dependencies
+
+Everything here is **optional**. `common.sh` guards each tool with `command -v`
+and silently skips whatever is not on `PATH`, so a partial install degrades
+instead of erroring.
+
+| Dependency | Needed for | macOS | Debian / Ubuntu | If missing |
+|---|---|---|---|---|
+| [starship](https://starship.rs) | the prompt | `brew install starship` | `curl -sS https://starship.rs/install.sh \| sh` | shell's default prompt |
+| [fzf](https://github.com/junegunn/fzf) | `CTRL+R`, `CTRL+T`, `ALT+C` | `brew install fzf` | `apt install fzf` | those keys do nothing |
+| [zoxide](https://github.com/ajeetdsouza/zoxide) | `z`, `zi` | `brew install zoxide` | `apt install zoxide` | no `z` |
+| [eza](https://github.com/eza-community/eza) | `ls`/`l`/`ll`/`la`/`lt`/`lta` | `brew install eza` | `apt install eza` (24.04+) | aliases undefined; real `ls` |
+| [bat](https://github.com/sharkdp/bat) | `bat`, `bathelp`, `man` colour | `brew install bat` | `apt install bat` (binary is `batcat`) | plain `man`, no `bathelp` |
+| [fd](https://github.com/sharkdp/fd) | `fda`, and fzf's file/dir source | `brew install fd` | `apt install fd-find` (binary is `fdfind`) | fzf falls back to `find` |
+| [ripgrep](https://github.com/BurntSushi/ripgrep) | `rg`, `ripgreprc` | `brew install ripgrep` | `apt install ripgrep` | no `rg` |
+| `col` | the `MANPAGER` pipeline | base system | `apt install bsdextrautils` | `MANPAGER` is not set; plain `man` |
+| bash-completion | completion **in bash only** | `brew install bash-completion@2` | `apt install bash-completion` | no completion in bash |
+| [Nerd Font](https://github.com/ryanoasis/nerd-fonts) | prompt glyph, eza icons | `brew install --cask font-jetbrains-mono-nerd-font` | download + `fc-cache -f` | replacement boxes |
+
+Two notes on Debian and Ubuntu:
+
+- `bat` and `fd` install under different binary names (`batcat`, `fdfind`)
+  because the obvious ones were already taken. `common.sh` aliases them back.
+- Ubuntu's `apt` starship package lags badly; the install script is the
+  maintained route.
+
+`bootstrap.sh` itself needs only POSIX tools and is written for **bash 3.2**, so
+it runs on a stock macOS as well as on Linux.
+
 ## What you get
-
-Install the tools first — `common.sh` silently skips anything that is not on
-`PATH`, so a partial install degrades rather than erroring.
-
-| Tool | macOS | Ubuntu |
-|---|---|---|
-| [starship](https://starship.rs) | `brew install starship` | `curl -sS https://starship.rs/install.sh \| sh` |
-| [fzf](https://github.com/junegunn/fzf) | `brew install fzf` | `apt install fzf` |
-| [zoxide](https://github.com/ajeetdsouza/zoxide) | `brew install zoxide` | `apt install zoxide` |
-| [eza](https://github.com/eza-community/eza) | `brew install eza` | `apt install eza` (24.04+) |
-| [bat](https://github.com/sharkdp/bat) | `brew install bat` | `apt install bat` |
-| [fd](https://github.com/sharkdp/fd) | `brew install fd` | `apt install fd-find` |
-| [ripgrep](https://github.com/BurntSushi/ripgrep) | `brew install ripgrep` | `apt install ripgrep` |
-
-Ubuntu's `apt` starship package is usually well behind; the install script above
-is the maintained route.
 
 ### Keys and commands
 
