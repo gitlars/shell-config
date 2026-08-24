@@ -56,11 +56,19 @@ case "$TARGET_SHELL" in
   *) echo "unsupported shell: $TARGET_SHELL" >&2; exit 2 ;;
 esac
 
+[ -r "$SHELL_DIR/${TARGET_SHELL}rc" ] || {
+  echo "missing $SHELL_DIR/${TARGET_SHELL}rc" >&2; exit 1; }
+
 block() {
+  # Prefer a $HOME-relative path so the line reads the same on every machine.
+  rcfile="$SHELL_DIR/${TARGET_SHELL}rc"
+  case "$rcfile" in
+    "$HOME"/*) rcfile="\$HOME${rcfile#$HOME}" ;;
+  esac
   printf '%s\n' "$BEGIN"
   printf '%s\n' "# Managed by $SHELL_DIR/bootstrap.sh -- this block is rewritten on update."
   printf '%s\n' "# Put your own settings OUTSIDE the markers; they are never touched."
-  printf '%s\n' '[ -r "$HOME/.config/shell/common.sh" ] && . "$HOME/.config/shell/common.sh"'
+  printf '%s\n' "[ -r \"$rcfile\" ] && . \"$rcfile\""
   printf '%s\n' "$END"
 }
 
@@ -78,7 +86,7 @@ find_conflicts() {
   local file="$1"
   [ -f "$file" ] || return 0
   strip_block "$file" | grep -nE \
-    'starship[[:space:]]+init|zoxide[[:space:]]+init|fzf[[:space:]]+--(zsh|bash)|key-bindings\.(zsh|bash)|config/shell/common\.sh|STARSHIP_CONFIG|^[[:space:]]*(alias[[:space:]]+z=|z[[:space:]]*\(\))' \
+    'starship[[:space:]]+init|zoxide[[:space:]]+init|fzf[[:space:]]+--(zsh|bash)|key-bindings\.(zsh|bash)|config/shell/|STARSHIP_CONFIG|compinit|bash_completion|^[[:space:]]*(alias[[:space:]]+z=|z[[:space:]]*\(\))' \
     || true
 }
 

@@ -19,8 +19,11 @@ Roughly 80% of a modern shell config ports cleanly:
 | tool init (`fzf`, `zoxide`, `starship`) | key bindings (`bindkey` vs `bind`) |
 | functions, if written POSIX-ish | |
 
-`common.sh` holds the portable part. Anything shell-specific belongs in the rc
-file for that shell, never in `common.sh`.
+`common.sh` holds the portable part. Anything shell-specific goes in `zshrc` or
+`bashrc`, never in `common.sh`.
+
+The sourcing chain is `~/.zshrc` → `zshrc` → `common.sh`. Order matters: the
+completion system has to be initialised before fzf's key bindings load.
 
 > **Scope note:** this covers zsh and bash only. Windows means PowerShell, where
 > the rc file does not port — though every tool below has a native Windows build,
@@ -31,6 +34,8 @@ file for that shell, never in `common.sh`.
 | Path | Purpose |
 |---|---|
 | `common.sh` | Portable config sourced by both shells. No `setopt`, `bindkey`, or `shopt`. |
+| `zshrc` | zsh-specific: completion, directory stack, history. Sources `common.sh`. |
+| `bashrc` | bash-specific: completion, history. Sources `common.sh`. |
 | `starship.toml` | Prompt configuration. Works unchanged in zsh, bash, fish and PowerShell. |
 | `ripgreprc` | ripgrep defaults (smart-case, search dotfiles, skip `.git`). |
 | `bootstrap.sh` | Wires a shell's rc file to `common.sh`. Idempotent and non-destructive. |
@@ -136,6 +141,29 @@ ones were already taken by unrelated packages:
 
 `common.sh` detects this and aliases them back, so the same commands work on
 both platforms without you having to remember which machine you are on.
+
+## Completion
+
+macOS never runs `compinit`, so a bare zsh has **no completion system at all** —
+no directory completion for `cd`, no git subcommands, no ssh hosts, no flags.
+`zshrc` initialises it, caches the dump under `$XDG_CACHE_HOME/zsh`, and
+re-audits only once a day, since that audit is the slowest part of zsh startup.
+
+Matching is case-insensitive and partial-word, so `cd dow⇥` finds `Downloads`
+and `cd u/l/b⇥` expands to `/usr/local/bin`.
+
+`cd` also keeps a directory stack (`AUTO_PUSHD`), so `cd -⇥` lists where you have
+been. `AUTO_CD` is deliberately left off — making a bare directory name change
+directory surprises people when a directory shares a name with a command.
+
+**bash needs a package for this**, unlike zsh:
+
+```sh
+brew install bash-completion@2      # macOS
+apt install bash-completion         # Debian/Ubuntu
+```
+
+`bashrc` searches the usual locations and loads whichever it finds.
 
 ## The prompt
 
