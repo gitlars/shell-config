@@ -1,7 +1,13 @@
 # starship prompt -- https://starship.rs
 #
-# Colours match the WezTerm Tokyo Night scheme so the prompt and the terminal
-# chrome read as one thing. Works identically in zsh, bash, fish and PowerShell.
+# Colours are ANSI names, not hex. Named colours resolve to whatever palette the
+# terminal is using, so the prompt matches Tokyo Night in WezTerm (whose ANSI
+# green really is #9ece6a) while still rendering correctly in terminals without
+# 24-bit colour -- macOS Terminal.app among them, which supports 256 colours and
+# no more, and mangles truecolor escapes into stray backgrounds.
+#
+# Same reasoning as BAT_THEME=ansi: follow the terminal's palette rather than
+# fighting it. Works in zsh, bash, fish and PowerShell.
 
 "$schema" = 'https://starship.rs/config-schema.json'
 
@@ -13,19 +19,6 @@ right_format = """$cmd_duration$status$jobs"""
 
 add_newline = true
 command_timeout = 1000
-
-palette = 'tokyonight'
-
-[palettes.tokyonight]
-blue    = '#7aa2f7'
-cyan    = '#7dcfff'
-green   = '#9ece6a'
-magenta = '#bb9af7'
-orange  = '#ff9e64'
-red     = '#f7768e'
-yellow  = '#e0af68'
-comment = '#565f89'
-fg      = '#c0caf5'
 
 # --- where you are -----------------------------------------------------------
 [directory]
@@ -43,7 +36,7 @@ read_only_style = 'red'
 # also carries dirty/ahead/behind state, which the status bar does not.
 [git_branch]
 symbol = ' '
-style = 'bold magenta'
+style = 'bold purple'
 format = 'on [$symbol$branch]($style) '
 
 [git_status]
@@ -79,7 +72,7 @@ vimcmd_symbol = '[](bold yellow)'
 # --- right side --------------------------------------------------------------
 [cmd_duration]
 min_time = 2000
-style = 'comment'
+style = 'bright-black'
 format = '[ $duration]($style) '
 
 [status]
