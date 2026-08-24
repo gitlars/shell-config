@@ -85,12 +85,21 @@ else
 fi
 
 # --- eza --------------------------------------------------------------------
-# Aliases only affect interactive use; scripts calling `ls` are unaffected.
+# Aliases apply to interactive use only; scripts calling `ls` are unaffected,
+# and `command ls` or `\ls` always reaches the real binary.
+#
+# GOTCHA: eza's -h is --header, not ls's --human-readable. eza prints human
+# sizes by default, so `ls -lh` still shows what you wanted -- plus a header.
 if command -v eza >/dev/null 2>&1; then
-  alias ls='eza --group-directories-first'
-  alias ll='eza -l  --git --group-directories-first'
-  alias la='eza -la --git --group-directories-first'
-  alias lt='eza --tree --level=2 --group-directories-first'
+  # icons=auto keeps icons out of pipes; they need a Nerd Font to render.
+  _eza='eza --group-directories-first --icons=auto'
+  alias ls="$_eza"
+  alias l="$_eza --oneline"
+  alias ll="$_eza --long --git --header --time-style=long-iso"
+  alias la="$_eza --long --git --header --time-style=long-iso --all"
+  alias lt="$_eza --tree --level=2"
+  alias lta="$_eza --tree --level=2 --all --ignore-glob=.git"
+  unset _eza
 fi
 
 # --- bat --------------------------------------------------------------------
@@ -101,6 +110,27 @@ if [ -n "$_bat" ]; then
   # `ansi` follows the terminal's own palette, so bat matches whatever colour
   # scheme is active instead of fighting it. `bat --list-themes` to change.
   export BAT_THEME="${BAT_THEME:-ansi}"
+  export BAT_STYLE="${BAT_STYLE:-numbers,changes,header}"
+
+  # Syntax-highlighted man pages. MANROFFOPT=-c is needed for groff 1.23+,
+  # which otherwise emits escapes that survive `col` and litter the output.
+  export MANPAGER="sh -c 'col -bx | $_bat --language=man --style=plain'"
+  export MANROFFOPT='-c'
+
+  # `bathelp fd` pages a long --help through bat. Deliberately not named
+  # `help`: that is a bash builtin, and shadowing it would break `help while`.
+  bathelp() {
+    local _b
+    _b=$(command -v bat 2>/dev/null || command -v batcat 2>/dev/null) || return 1
+    "$@" --help 2>&1 | "$_b" --language=help --style=plain
+  }
+fi
+
+# --- fd ---------------------------------------------------------------------
+# fd respects .gitignore and skips dotfiles by default, which is right almost
+# always. `fda` is the escape hatch for the times it is not.
+if [ -n "$_fd" ]; then
+  alias fda="$_fd --hidden --no-ignore"
 fi
 
 # --- ripgrep ----------------------------------------------------------------

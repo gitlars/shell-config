@@ -114,12 +114,28 @@ to the key-binding scripts that older package installs on disk.
 
 | Command | Does |
 |---|---|
-| `ls` | `eza`, directories first |
-| `ll` / `la` | long listing, with git status per file / including dotfiles |
-| `lt` | tree, two levels deep |
+| `ls` | `eza` — directories first, icons |
+| `l` | one entry per line |
+| `ll` | long listing: per-file git status, header, `long-iso` timestamps |
+| `la` | same, including dotfiles |
+| `lt` / `lta` | tree two levels deep / including dotfiles, minus `.git` |
 | `bat FILE` | `cat` with syntax highlighting and paging |
+| `bathelp CMD` | pages `CMD --help` through bat |
 | `fd PATTERN` | find files; respects `.gitignore`, far faster than `find` |
+| `fda PATTERN` | same, but searches dotfiles and ignored files too |
 | `rg PATTERN` | recursive search; smart-case, searches dotfiles, skips `.git` |
+| `man CMD` | syntax-highlighted, via `MANPAGER` |
+
+Icons use `--icons=auto`, so they appear on a terminal and never in a pipe.
+They need a Nerd Font; without one you get replacement boxes.
+
+**`eza -h` is not `ls -h`.** In eza, `-h` means `--header`; `--human-readable`
+does not exist because eza prints human sizes already. So `ls -lh` still shows
+what you meant, and adds a header row. `command ls` or `\ls` reaches the real
+binary whenever you want stock behaviour.
+
+`bathelp` is deliberately not called `help` — that is a bash builtin, and
+shadowing it would break `help while` and friends.
 
 **`cat` is deliberately not aliased to `bat`.** `cat` is a POSIX tool people
 reason about as behaving exactly one way, and silently changing it invites
