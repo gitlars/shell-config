@@ -33,7 +33,7 @@ style = 'bold blue'
 truncation_length = 3
 truncate_to_repo = true
 truncation_symbol = '…/'
-read_only = ' '
+read_only = ' '
 read_only_style = 'red'
 
 # --- git ---------------------------------------------------------------------
@@ -42,7 +42,7 @@ read_only_style = 'red'
 # scrollback, so you can see which branch a command ran on days later. This one
 # also carries dirty/ahead/behind state, which the status bar does not.
 [git_branch]
-symbol = ' '
+symbol = ' '
 style = 'bold magenta'
 format = 'on [$symbol$branch]($style) '
 
@@ -92,7 +92,7 @@ map_symbol = true
 [jobs]
 style = 'bold cyan'
 format = '[$symbol$number]($style) '
-symbol = ' '
+symbol = ' '
 number_threshold = 1
 
 # --- language versions, only where relevant ----------------------------------
