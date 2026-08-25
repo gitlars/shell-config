@@ -35,6 +35,7 @@ completion system has to be initialised before fzf's key bindings load.
 |---|---|
 | `common.sh` | Portable config sourced by both shells. No `setopt`, `bindkey`, or `shopt`. |
 | `zshrc` | zsh-specific: completion, plugins, directory stack, history. Sources `common.sh`. |
+| `CHEATSHEET.md` | Old habit → new command, and a two-week plan for retraining. |
 | `bashrc` | bash-specific: completion, history. Sources `common.sh`. |
 | `starship.toml` | Prompt configuration. Works unchanged in zsh, bash, fish and PowerShell. |
 | `ripgreprc` | ripgrep defaults (smart-case, search dotfiles, skip `.git`). |
