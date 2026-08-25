@@ -4,3 +4,6 @@
 # OS noise
 .DS_Store
 Thumbs.db
+
+# fzf-tab clone on platforms without a package
+plugins/

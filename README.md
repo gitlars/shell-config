@@ -34,7 +34,7 @@ completion system has to be initialised before fzf's key bindings load.
 | Path | Purpose |
 |---|---|
 | `common.sh` | Portable config sourced by both shells. No `setopt`, `bindkey`, or `shopt`. |
-| `zshrc` | zsh-specific: completion, directory stack, history. Sources `common.sh`. |
+| `zshrc` | zsh-specific: completion, plugins, directory stack, history. Sources `common.sh`. |
 | `bashrc` | bash-specific: completion, history. Sources `common.sh`. |
 | `starship.toml` | Prompt configuration. Works unchanged in zsh, bash, fish and PowerShell. |
 | `ripgreprc` | ripgrep defaults (smart-case, search dotfiles, skip `.git`). |
@@ -94,6 +94,9 @@ instead of erroring.
 | `col` | the `MANPAGER` pipeline | base system | `apt install bsdextrautils` | `MANPAGER` is not set; plain `man` |
 | bash-completion | completion **in bash only** | `brew install bash-completion@2` | `apt install bash-completion` | no completion in bash |
 | [Nerd Font](https://github.com/ryanoasis/nerd-fonts) | prompt glyph, eza icons | `brew install --cask font-jetbrains-mono-nerd-font` | download + `fc-cache -f` | replacement boxes |
+| [zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) | ghost-text suggestions (**zsh only**) | `brew install zsh-autosuggestions` | `apt install zsh-autosuggestions` | no suggestions |
+| [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting) | command colouring (**zsh only**) | `brew install zsh-syntax-highlighting` | `apt install zsh-syntax-highlighting` | plain white input |
+| [fzf-tab](https://github.com/Aloxaf/fzf-tab) | fuzzy TAB menu (**zsh only**) | `brew install fzf-tab` | not packaged — see below | stock zsh menu |
 
 Two notes on Debian and Ubuntu:
 
@@ -193,6 +196,43 @@ apt install bash-completion         # Debian/Ubuntu
 ```
 
 `bashrc` searches the usual locations and loads whichever it finds.
+
+## zsh plugins
+
+Three, all **zsh only** — bash has no equivalent, so this is the one place the
+two shells genuinely diverge.
+
+| Plugin | What you see |
+|---|---|
+| **zsh-autosuggestions** | grey ghost text completing the line from history; `→` accepts, or keep typing to ignore |
+| **zsh-syntax-highlighting** | the command turns green when it resolves, red when it does not — before you press enter |
+| **fzf-tab** | `TAB` opens a fuzzy picker instead of a plain list, with a directory preview for `cd` |
+
+### Load order matters
+
+Get it wrong and things fail *quietly* rather than loudly:
+
+1. **fzf-tab** must load after `compinit` **and** after `common.sh`. fzf's own
+   completion binds `TAB`, and whichever loads last wins. Check with
+   `bindkey '^I'` — it should say `fzf-tab-complete`.
+2. **zsh-autosuggestions** after fzf-tab.
+3. **zsh-syntax-highlighting** last of everything. It wraps every ZLE widget
+   defined before it, so anything loaded afterwards goes unhighlighted.
+
+`zshrc` also sets `zstyle ':completion:*' menu no` when fzf-tab loads — fzf-tab
+brings its own menu, and zsh's built-in one fights it.
+
+Suggestion colour is `fg=8` (ANSI bright-black) rather than a hex value, so it
+stays legible in any palette and needs no truecolor.
+
+### fzf-tab on Debian and Ubuntu
+
+It is not packaged. Clone it where `zshrc` already looks — the directory is
+gitignored:
+
+```sh
+git clone --depth 1 https://github.com/Aloxaf/fzf-tab ~/.config/shell/plugins/fzf-tab
+```
 
 ## The prompt
 
